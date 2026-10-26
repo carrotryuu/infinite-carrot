@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-T00 脚手架已实现，本地代码检查通过；容器验收转由 GitHub CI 执行，等待结果。
+T00 已实现并通过代码与 GitHub CI 容器验收，PR #1 待人工审核合并。下一个任务：T01 画布性能 PoC。
 
 ## 已定事项（2026-10-26）
 
@@ -27,6 +27,7 @@ T00 脚手架已实现，本地代码检查通过；容器验收转由 GitHub CI
 - 已实现：pnpm workspace 四个包；React 18/Vite 空白首页；NestJS `/health`；Redis worker 进程；共享健康类型；Prisma 空 schema；strict TypeScript、ESLint、Prettier、Vitest/supertest、Playwright。
 - 部署：web、server、worker、PostgreSQL 16、Redis 7 五个服务；worker 内含 FFmpeg；NAS 用绝对宿主机路径挂载；部署模式仅暴露 web 端口。
 - 已通过：lint、typecheck、4 项 Vitest 测试、生产构建、1 项 Chromium 端到端测试。
-- 待完成：GitHub CI 的最终 Docker 部署、数据库停机恢复验收及 PR。
+- GitHub CI 已通过五服务启动、首页和健康接口、FFmpeg、数据库停机后 `down`、重启后 `ok` 的自动验收：[运行记录](https://github.com/carrotryuu/infinite-carrot/actions/runs/40315959553)。
+- PR：https://github.com/carrotryuu/infinite-carrot/pull/1；待人工审核合并。
 - 本机环境问题：构建 worker 时 C 盘剩余空间为 0，Docker 缓存出现 I/O 错误，Docker Desktop 随后无法启动。本地五服务验收未完成，不能当作通过；需要释放 C 盘空间或迁移 Docker 数据目录后再进行本机部署。
 - 下个任务注意：T00 不创建业务表和演示数据；数据库迁移及 seed 随后续业务任务增加。NAS 健康检查只检查目录和读写权限，实际挂载离线探针在 T05 实现。外部业务调用默认 Mock。

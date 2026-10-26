@@ -1,0 +1,5 @@
+// T00 不创建业务表。T02 起通过 Prisma migration 增加模型。
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

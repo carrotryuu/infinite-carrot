@@ -1,0 +1,6 @@
+# 仅本机开发时暴露基础服务，生产部署不加载此文件。
+services:
+  postgres:
+    ports: ['127.0.0.1:${POSTGRES_PORT:-5432}:5432']
+  redis:
+    ports: ['127.0.0.1:${REDIS_PORT:-6379}:6379']

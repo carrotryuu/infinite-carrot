@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noEmit": true
+  },
+  "include": [
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "tests",
+    "apps/**/*.test.ts",
+    "packages/**/*.test.ts"
+  ]
+}

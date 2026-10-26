@@ -1,0 +1,33 @@
+name: T00 checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      MOCK_EXTERNAL: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install -g pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck && pnpm test && pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - name: Compose acceptance
+        run: |
+          cp .env.example .env
+          mkdir -p "$PWD/.data/nas"
+          chmod 777 "$PWD/.data/nas"
+          sed -i "s|^NAS_ROOT=.*|NAS_ROOT=$PWD/.data/nas|" .env
+          docker compose up -d --build --wait
+          node scripts/verify-deploy.mjs
+      - name: Container diagnostics
+        if: failure()
+        run: docker compose logs --tail=100
+      - name: Stop test services
+        if: always()
+        run: docker compose down

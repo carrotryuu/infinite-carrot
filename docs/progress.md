@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-尚未开工。下一个任务：T00 仓库脚手架与一键部署。
+T00 脚手架已实现，本地代码检查通过；容器验收转由 GitHub CI 执行，等待结果。
 
 ## 已定事项（2026-10-26）
 
@@ -22,4 +22,11 @@
 
 ## 任务记录
 
-（每个任务完成后由 Codex 在此追加：完成内容、未完成项、已知问题、下个任务要注意的事）
+### T00（2026-10-26）
+
+- 已实现：pnpm workspace 四个包；React 18/Vite 空白首页；NestJS `/health`；Redis worker 进程；共享健康类型；Prisma 空 schema；strict TypeScript、ESLint、Prettier、Vitest/supertest、Playwright。
+- 部署：web、server、worker、PostgreSQL 16、Redis 7 五个服务；worker 内含 FFmpeg；NAS 用绝对宿主机路径挂载；部署模式仅暴露 web 端口。
+- 已通过：lint、typecheck、4 项 Vitest 测试、生产构建、1 项 Chromium 端到端测试。
+- 待完成：GitHub CI 的最终 Docker 部署、数据库停机恢复验收及 PR。
+- 本机环境问题：构建 worker 时 C 盘剩余空间为 0，Docker 缓存出现 I/O 错误，Docker Desktop 随后无法启动。本地五服务验收未完成，不能当作通过；需要释放 C 盘空间或迁移 Docker 数据目录后再进行本机部署。
+- 下个任务注意：T00 不创建业务表和演示数据；数据库迁移及 seed 随后续业务任务增加。NAS 健康检查只检查目录和读写权限，实际挂载离线探针在 T05 实现。外部业务调用默认 Mock。

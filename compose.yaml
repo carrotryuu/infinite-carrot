@@ -1,0 +1,3 @@
+# Compose 2.20+ resolves included paths relative to deploy/.
+include:
+  - deploy/docker-compose.yml

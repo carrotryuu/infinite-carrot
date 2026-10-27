@@ -1,0 +1,5 @@
+// T00 deliberately has no business models. Add models and migrations in their owning tasks.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

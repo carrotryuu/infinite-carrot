@@ -8,15 +8,16 @@
     "pnpm": ">=10 <11"
   },
   "scripts": {
-    "dev": "pnpm --filter @carrot/shared build && dotenv -e .env -- pnpm --parallel --filter @carrot/web --filter @carrot/server --filter @carrot/worker dev",
+    "dev": "pnpm --filter @carrot/shared build && pnpm --filter @carrot/server build && dotenv -e .env -- pnpm --parallel --filter @carrot/web --filter @carrot/server --filter @carrot/worker dev",
     "build": "pnpm -r build",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm --filter @carrot/shared build && pnpm -r typecheck && tsc -p tsconfig.tools.json",
+    "typecheck": "pnpm --filter @carrot/shared build && pnpm --filter @carrot/server build && pnpm -r typecheck && tsc -p tsconfig.tools.json",
     "test": "vitest run",
     "e2e": "dotenv -e .env -- playwright test",
     "db:validate": "dotenv -e .env -- pnpm --filter @carrot/server exec prisma validate",
+    "db:generate": "pnpm --filter @carrot/server exec prisma generate",
     "db:migrate": "dotenv -e .env -- pnpm --filter @carrot/server exec prisma migrate deploy",
     "db:migrate:dev": "dotenv -e .env -- pnpm --filter @carrot/server exec prisma migrate dev",
     "db:seed": "node scripts/seed.mjs"

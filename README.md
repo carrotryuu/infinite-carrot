@@ -1,6 +1,6 @@
 # AI 视频无限画布
 
-当前已交付 T00 工程脚手架，并实现 T01 画布性能 PoC。前端首页可进入 `/poc/canvas`；后端只提供基础设施健康检查；worker 只初始化队列连接。业务开发以 docs/tasks.md、docs/decisions.md 和 docs/progress.md 为准。
+当前已交付 T00 工程脚手架、T01 画布性能 PoC，并实现 T02 模型网关 Mock 闭环。首页可进入 `/poc/canvas` 和 `/poc/gateway`；真实模型联调仍待网络放行与密钥配置。业务开发以 docs/tasks.md、docs/decisions.md 和 docs/progress.md 为准。
 
 在当前 Windows 电脑上，双击根目录的 `start-local.cmd` 可启动 Docker 和项目，等待健康检查通过后打开浏览器。首页链接进入 150 节点的性能验证画布；此页面刷新后重置，不是正式业务画布。
 
@@ -34,7 +34,7 @@ docker compose --env-file .env -f deploy/docker-compose.yml -f deploy/docker-com
 pnpm dev
 ```
 
-访问 `http://localhost:5173`；`http://localhost:5173/api/health` 通过 Vite 转发到后端 `/health`。SERVER_PORT 默认 3000，Vite 端口固定 5173。`pnpm dev` 先构建共享包，再同时启动前端、API 和 worker。修改共享包后重新运行此命令。
+访问 `http://localhost:5173`；`http://localhost:5173/api/health` 通过 Vite 转发到后端 `/health`。SERVER_PORT 默认 3000，Vite 端口固定 5173。`pnpm dev` 先构建共享包与后端，再同时启动前端、API 和 worker。修改共享包或网关适配器后重新运行此命令。
 
 Linux/macOS 使用 `cp .env.example .env` 和 `mkdir -p .local/nas`，其余命令相同。
 
@@ -54,7 +54,7 @@ Vitest 的接口测试替换基础设施探针，覆盖健康、故障、恢复�
 
 浏览器测试默认使用已安装的 Chrome；如已有 Chrome，无需再次执行安装命令。设 `PLAYWRIGHT_CHANNEL=msedge` 可测试已安装的 Edge，终端环境变量优先于 `.env`。T01 校验 H.264 解码，CI 同样使用正式 Chrome，不使用缺少相应媒体编解码器的默认 Chromium。
 
-T00 没有业务表，Prisma 只配置数据源与迁移目录；健康检查使用 PostgreSQL 驱动执行 `SELECT 1`。后续业务必须通过 Prisma migration 建表。`pnpm db:migrate:dev` 创建开发迁移，`pnpm db:migrate` 部署已有迁移。`pnpm db:seed` 在 T00 明确报未实现，不伪造演示数据；T03/T04 再加入种子用户与组织。
+T02 已通过 Prisma migration 加入 generation_tasks 和只追加的 audit_logs；健康检查使用 PostgreSQL 驱动执行 `SELECT 1`。后续业务必须通过 Prisma migration 建表。`pnpm db:migrate:dev` 创建开发迁移，`pnpm db:migrate` 部署已有迁移。`pnpm db:seed` 在 T00 明确报未实现，不伪造演示数据；T03/T04 再加入种子用户与组织。
 
 ## 内网部署
 
@@ -102,3 +102,7 @@ node scripts/verify-compose.mjs
 - docs：原始需求、补充决定、任务与实际进度。
 
 T00 不涉及飞书权限或模型 API 放行；模型 ID、凭据和业务实现留给各自任务。
+
+## T02 模型网关
+
+设置 POC_GATEWAY_ENABLED=1、MOCK_EXTERNAL=1 后访问 /poc/gateway。默认并发 4，Mock 随机 10～30 秒完成；生产容器启动时自动部署迁移。协议、恢复边界、验收命令和真实联调前置条件见 [网关 PoC 报告](docs/poc-gateway.md)。真实模型密钥只能配置在服务端环境，不能提交 Git。

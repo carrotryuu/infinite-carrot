@@ -21,6 +21,11 @@ jobs:
       REDIS_URL: redis://127.0.0.1:6379/0
       MOCK_EXTERNAL: '1'
       E2E_REQUIRE_HEALTHY: '1'
+      POC_GATEWAY_ENABLED: '1'
+      GATEWAY_INTEGRATION_TESTS: '1'
+      MOCK_MIN_MS: '1000'
+      MOCK_MAX_MS: '1500'
+      MODEL_POLL_MS: '100'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -31,6 +36,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/carrot-nas"
           echo "NAS_ROOT=$RUNNER_TEMP/carrot-nas" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate && pnpm db:migrate
       - run: pnpm lint && pnpm typecheck && pnpm test
       - run: pnpm build && pnpm db:validate
       - run: pnpm exec playwright install --with-deps chrome

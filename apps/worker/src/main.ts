@@ -1,6 +1,8 @@
 import { readInfrastructureEnv } from '@carrot/shared';
 import { Queue } from 'bullmq';
 import { shutdownOnce } from './runtime';
+import { GatewayRuntime } from '@carrot/server/gateway/runtime';
+import { readGatewayConfig } from '@carrot/server/gateway/config';
 
 const env = readInfrastructureEnv(process.env);
 const redis = new URL(env.REDIS_URL);
@@ -16,7 +18,16 @@ const queue = new Queue('system', {
   },
 });
 queue.on('error', () => console.error('Worker Redis connection unavailable; retrying.'));
-const shutdown = shutdownOnce(queue);
+const gateway =
+  process.env.POC_GATEWAY_ENABLED === '1'
+    ? new GatewayRuntime(readGatewayConfig(), 'poc-worker')
+    : undefined;
+const shutdown = shutdownOnce({
+  close: async () => {
+    await gateway?.close();
+    await queue.close();
+  },
+});
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
     void shutdown().catch(() => {
@@ -26,7 +37,10 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 }
 void queue
   .waitUntilReady()
-  .then(() => console.log('Worker ready (T00 infrastructure).'))
+  .then(async () => {
+    await gateway?.start(true);
+    console.log(gateway ? 'Gateway worker ready.' : 'Worker ready (T00 infrastructure).');
+  })
   .catch(() => {
     console.error('Worker initialization failed.');
     process.exitCode = 1;

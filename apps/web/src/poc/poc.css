@@ -1,0 +1,341 @@
+.poc-shell {
+  padding: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #263b35;
+  background: #f4f6f3;
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+.poc-shell button {
+  font: inherit;
+  font-size: 12px;
+  padding: 8px 12px;
+  border: 1px solid #d3dcd5;
+  border-radius: 6px;
+  background: #fff;
+  color: #314f43;
+  cursor: pointer;
+}
+.poc-shell button:hover {
+  background: #edf3ee;
+  border-color: #7d9c8e;
+}
+.poc-shell button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.poc-topbar {
+  height: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 26px;
+  border-bottom: 1px solid #dbe2da;
+  gap: 22px;
+  background: #fff;
+}
+.poc-brand {
+  color: #254f41;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 24px;
+  border-right: 1px solid #e1e6df;
+}
+.poc-brand > span {
+  background: #284e40;
+  color: #fff;
+  font-size: 27px;
+  border-radius: 9px;
+  width: 38px;
+  text-align: center;
+}
+.poc-title {
+  flex: 1;
+}
+.poc-title > span {
+  font-size: 10px;
+  color: #819087;
+  letter-spacing: 1px;
+}
+.poc-title h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 5px 0 0;
+}
+.poc-badge {
+  color: #5f7e56;
+  font-size: 11px;
+  background: #edf3e6;
+  padding: 7px 10px;
+  border-radius: 4px;
+}
+.poc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 26px;
+  font-size: 12px;
+  color: #748279;
+}
+.poc-toolbar > div {
+  flex: 1;
+}
+.poc-toolbar strong {
+  color: #294a3d;
+}
+.poc-toolbar i {
+  display: inline-block;
+  height: 10px;
+  border-right: 1px solid #c7d0c7;
+  margin: 0 14px;
+}
+.poc-workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  border-top: 1px solid #dbe2da;
+}
+.poc-stage {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background: #eef2ee;
+}
+.poc-card {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #d1dcd4;
+  border-radius: 9px;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.react-flow__node.selected .poc-card {
+  border: 2px solid #35755b;
+}
+.poc-card header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 31px;
+  padding: 0 10px;
+  font-size: 11px;
+}
+.kind-mark {
+  font-size: 10px;
+  color: #648b79;
+}
+.sample-tag {
+  margin-left: auto;
+  font-size: 8px;
+  color: #8b9990;
+}
+.card-media {
+  position: relative;
+  height: 121px;
+  background: #dfe6df;
+}
+.card-media img,
+.card-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.media-state {
+  position: absolute;
+  bottom: 7px;
+  left: 7px;
+  background: #182a25cc;
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 8px;
+  pointer-events: none;
+}
+.card-copy {
+  font-size: 13px;
+  line-height: 1.8;
+  padding: 12px;
+  margin: 0;
+  color: #6a746b;
+}
+.poc-card.text {
+  background: #fffcf1;
+}
+.poc-card.simple {
+  display: flex;
+  align-items: center;
+  background: #e5ede6;
+}
+.poc-card.simple header {
+  width: 100%;
+  font-size: 24px;
+}
+.poc-card.simple .sample-tag,
+.poc-card.simple .kind-mark {
+  display: none;
+}
+.poc-card .react-flow__handle {
+  width: 5px;
+  height: 5px;
+  background: #759584;
+  border-color: #eef2ee;
+}
+.react-flow__edge-path {
+  stroke: #91a69a;
+  stroke-width: 1;
+}
+.poc-stage .react-flow__minimap {
+  border: 1px solid #d6ded6;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: none;
+}
+.poc-shell .react-flow__controls-button {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border-radius: 0;
+}
+.poc-shell .react-flow__controls-button svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+.canvas-caption {
+  position: absolute;
+  top: 15px;
+  left: 18px;
+  font-size: 10px;
+  color: #849388;
+  pointer-events: none;
+  letter-spacing: 1px;
+}
+.poc-metrics {
+  width: 254px;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 22px 20px;
+  border-left: 1px solid #dbe2da;
+  overflow-y: auto;
+}
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+.live-dot {
+  font-size: 9px;
+  color: #64865d;
+  letter-spacing: 1px;
+}
+.fps-number {
+  font-size: 56px;
+  font-weight: 300;
+  letter-spacing: -3px;
+  margin: 12px 0;
+  color: #345d49;
+  font-variant-numeric: tabular-nums;
+}
+.fps-number small {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #8c998c;
+}
+.poc-metrics dl {
+  font-size: 11px;
+  margin: 0 0 25px;
+}
+.poc-metrics dl > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f3ee;
+}
+.poc-metrics dt {
+  color: #89958a;
+}
+.poc-metrics dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.poc-metrics h2 {
+  font-size: 12px;
+  font-weight: 600;
+}
+.poc-metrics p {
+  font-size: 10px;
+  color: #89958a;
+  line-height: 1.8;
+}
+.record-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 8px;
+}
+.poc-shell .record-buttons button {
+  font-size: 10px;
+  padding: 7px 9px;
+}
+.poc-shell .stop-record {
+  width: 100%;
+  background: #2b5543;
+  color: #fff;
+}
+.record {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e6ece5;
+  font-size: 10px;
+}
+.record small {
+  color: #8b968d;
+  font-size: 9px;
+}
+.poc-shell .export-report {
+  width: 100%;
+  margin-top: 16px;
+}
+.poc-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 24px;
+  font-size: 10px;
+  color: #7b8b7e;
+  background: #fff;
+  border-top: 1px solid #dbe2da;
+}
+.poc-footer kbd {
+  padding: 2px 5px;
+  border: 1px solid #d9e1d7;
+  border-radius: 3px;
+}
+@media (max-width: 900px) {
+  .poc-metrics {
+    width: 220px;
+    padding: 16px;
+  }
+  .poc-badge,
+  .poc-footer > span:last-child {
+    display: none;
+  }
+  .poc-topbar {
+    padding: 0 14px;
+    gap: 10px;
+  }
+  .poc-toolbar {
+    padding: 10px 14px;
+  }
+}

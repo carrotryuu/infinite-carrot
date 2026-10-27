@@ -1,0 +1,180 @@
+{
+  "timestamp": "2026-10-27T12:43:34.582Z",
+  "baseURL": "http://127.0.0.1:4173",
+  "channel": "chrome",
+  "browserVersion": "156.0.8078.48",
+  "headless": false,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "devicePixelRatio": 1,
+  "gpu": [
+    {
+      "vendorId": 4318,
+      "deviceId": 12036,
+      "subSysId": 302084983,
+      "revision": 161,
+      "vendorString": "",
+      "deviceString": "NVIDIA GeForce RTX 5070",
+      "driverVendor": "NVIDIA",
+      "driverVersion": "32.0.16.2101"
+    },
+    {
+      "vendorId": 5140,
+      "deviceId": 140,
+      "subSysId": 0,
+      "revision": 0,
+      "vendorString": "",
+      "deviceString": "Microsoft Basic Render Driver",
+      "driverVendor": "",
+      "driverVersion": "10.0.26100.9711"
+    }
+  ],
+  "runs": [
+    {
+      "run": 1,
+      "firstPaintMs": 139.2999999988824,
+      "decodeMs": 2.299999998882413,
+      "heapBytes": 55310867,
+      "recordings": [
+        {
+          "operation": "pan",
+          "durationMs": 6544.8,
+          "frames": 1172,
+          "averageFps": 179.07346290184574,
+          "minimumWindowFps": 173.98260173982604,
+          "worstFrameMs": 22.199999999999932,
+          "valid": true
+        },
+        {
+          "operation": "zoom",
+          "durationMs": 5655.8,
+          "frames": 1017,
+          "averageFps": 179.81541072880935,
+          "minimumWindowFps": 178.98210178982094,
+          "worstFrameMs": 11.100000000000364,
+          "valid": true
+        },
+        {
+          "operation": "selection-drag",
+          "durationMs": 8111.4,
+          "frames": 1458,
+          "averageFps": 179.74702270878024,
+          "minimumWindowFps": 179,
+          "worstFrameMs": 11.099999999998545,
+          "valid": true
+        }
+      ],
+      "liveFps": 180,
+      "recording": null,
+      "videoSample": {
+        "maxMounted": 4,
+        "maxPlaying": 4
+      },
+      "heap": {
+        "usedSize": 46009268,
+        "totalSize": 95330304,
+        "embedderHeapUsedSize": 75707512,
+        "backingStorageSize": 484611
+      },
+      "workingSetBytes": 898928640
+    },
+    {
+      "run": 2,
+      "firstPaintMs": 111.30000000074506,
+      "decodeMs": 3.300000000745058,
+      "heapBytes": 38458223,
+      "recordings": [
+        {
+          "operation": "pan",
+          "durationMs": 6400.2,
+          "frames": 1152,
+          "averageFps": 179.99437517577576,
+          "minimumWindowFps": 179.98200179981998,
+          "worstFrameMs": 5.700000000000728,
+          "valid": true
+        },
+        {
+          "operation": "zoom",
+          "durationMs": 5711.3,
+          "frames": 1028,
+          "averageFps": 179.99404688949977,
+          "minimumWindowFps": 179.98200179981995,
+          "worstFrameMs": 5.700000000000728,
+          "valid": true
+        },
+        {
+          "operation": "selection-drag",
+          "durationMs": 8389.300000000001,
+          "frames": 1508,
+          "averageFps": 179.7527803273217,
+          "minimumWindowFps": 178.9821017898213,
+          "worstFrameMs": 11.200000000000728,
+          "valid": true
+        }
+      ],
+      "liveFps": 180,
+      "recording": null,
+      "videoSample": {
+        "maxMounted": 4,
+        "maxPlaying": 4
+      },
+      "heap": {
+        "usedSize": 36165432,
+        "totalSize": 105816064,
+        "embedderHeapUsedSize": 22204912,
+        "backingStorageSize": 467432
+      },
+      "workingSetBytes": 933904384
+    },
+    {
+      "run": 3,
+      "firstPaintMs": 111.90000000037253,
+      "decodeMs": 2.5,
+      "heapBytes": 26666311,
+      "recordings": [
+        {
+          "operation": "pan",
+          "durationMs": 6405.8,
+          "frames": 1153,
+          "averageFps": 179.9931312248275,
+          "minimumWindowFps": 179.98200179981995,
+          "worstFrameMs": 5.800000000000068,
+          "valid": true
+        },
+        {
+          "operation": "zoom",
+          "durationMs": 5739.1,
+          "frames": 1033,
+          "averageFps": 179.9933787527661,
+          "minimumWindowFps": 179.98200179981995,
+          "worstFrameMs": 5.800000000001091,
+          "valid": true
+        },
+        {
+          "operation": "selection-drag",
+          "durationMs": 8344.800000000001,
+          "frames": 1477,
+          "averageFps": 176.99645288083596,
+          "minimumWindowFps": 168,
+          "worstFrameMs": 11.200000000000728,
+          "valid": true
+        }
+      ],
+      "liveFps": 180,
+      "recording": null,
+      "videoSample": {
+        "maxMounted": 4,
+        "maxPlaying": 4
+      },
+      "heap": {
+        "usedSize": 24403856,
+        "totalSize": 98738176,
+        "embedderHeapUsedSize": 19986376,
+        "backingStorageSize": 466803
+      },
+      "workingSetBytes": 900321280
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-T00 工程实现与本机验收已完成：五个容器运行，数据库、Redis、NAS 均正常，真实停库/恢复、FFmpeg 和 Chrome/Edge 验收通过。已关联远程仓库 carrotryuu/infinite-carrot；用户授权以当前项目替换原内容并继续。正在完成 GitHub 登录、T00 PR 与合并，完成后再进入 T01。
+T00 已完成并通过 PR #2 合并（5f839d2），旧版备份分支已推送。T01 画布性能 PoC 工程与本机实测已完成，正在提交独立 PR；目标机验收按用户新决定移到 T23 使用测试，不阻塞 T01 当前交付，45 FPS / 3 秒门槛保持不变。
 
 ## 已定事项（2026-10-26）
 
@@ -32,7 +32,7 @@ T00 工程实现与本机验收已完成：五个容器运行，数据库、Redi
 - 额外检查：pnpm format:check 通过；Compose/CI YAML 可解析，五服务及构建路径存在；安装 Docker 后 docker compose config --quiet 通过；.env、下载工具、NAS 测试目录均被 Git 忽略。静态检查不能代替 Docker 验收。
 - 环境：使用应用内置 Node.js 24.19.0 和 Git；pnpm 10.11.0 下载到被忽略的 .tools；已生成依赖锁文件。本机初始无 Docker/WSL，按用户明确要求安装后：WSL 3.0.3、Docker Desktop 4.97.0（当前用户模式，安装器返回 0，Docker Inc 数字签名有效）、Docker CLI 29.9.2、Compose 5.6.1。VirtualMachinePlatform 启用后需要系统重启；本次未重启电脑。
 - 容器验收（重启后完成）：scripts/verify-compose.mjs 通过首页、三项健康检查、真实 PostgreSQL 停止后 503/down 及恢复后 200/ok；五服务运行，server/postgres/redis 健康，worker 日志 ready，容器内 FFmpeg 5.1.9 可运行。
-- PR：远程仓库为 https://github.com/carrotryuu/infinite-carrot；本地说明见 docs/t00-pr.md。原 main 提交 a48419e 已保存为本地备份分支 codex/backup-before-t00-20261027，待登录后推送；更新继承原历史，不强推。
+- PR：https://github.com/carrotryuu/infinite-carrot/pull/2 已合并。原 main 提交 a48419e 已推送到备份分支 codex/backup-before-t00-20261027；更新继承原历史，不强推。修复 GitHub Actions 在 job env 中不支持 runner.temp 的配置问题后，push 与 PR 两轮 CI 均通过。
 - 后续注意：T00 未建业务表或演示数据；Prisma 当前仅数据源和迁移目录，健康检查用 pg 执行 SELECT 1。db:seed 明确返回未实现；T03/T04 再加种子数据。不要提前实现后续业务。
 
 #### 重启后排查与清理（2026-10-27）
@@ -52,3 +52,13 @@ T00 工程实现与本机验收已完成：五个容器运行，数据库、Redi
 4. 根目录已有被忽略的 .env，NAS_ROOT 指向 `D:/infinite-carrot/.local/nas`，本地数据库密码已随机生成；不要打印 .env 内容。
 5. 执行 `node scripts/verify-compose.mjs`，检查 worker 容器内 FFmpeg，设置 E2E_BASE_URL 指向容器首页且 E2E_REQUIRE_HEALTHY=1 后重跑浏览器验收。
 6. 更新此进度及 docs/t00-pr.md；有远程仓库后再创建 PR。
+
+### T01（2026-10-27）
+
+- 依赖已核对：T00 PR #2 已合并。分支 codex/t01-canvas-poc，范围为 M5 性能 PoC，不包含持久化、业务后端或模型调用。
+- 完成：`/poc/canvas`；100 视频、30 图片、20 文本节点、150 连线、MiniMap；五个自生成 720p H.264 样片；视口裁剪、0.4 以下简化卡片、最多四个播放器；Yjs 文档和统一命令入口；页面 FPS/首屏/JS 堆显示、三类操作记录和 JSON 导出。
+- 本机生产构建三轮实测：Yjs→首屏 111.3～139.3 ms，平移/缩放平均约 180 FPS，50 节点框选拖动平均 177.0～179.8 FPS。视频挂载和播放峰值均为 4。报告和原始数据见 docs/poc-canvas.md、docs/poc-canvas-results.json。
+- 测试：format:check、lint、typecheck、11 项 Vitest 测试通过；Chrome、Edge 对更新后的 Docker 站点各通过 4 项 E2E（要求真实依赖全部健康），覆盖实际 720p 解码、全局播放器上限、低倍率卸载及全部 50 个节点同位移拖动。前端容器已更新，临时生产预览进程已结束；CI 结果随 PR 更新。
+- 验收时机变更：用户明确将 16 GB/集显目标机测试移至使用测试，已同步 decisions.md 第 8 条和 tasks.md T01/T23。目标机尚未测试，不能把本机 Ryzen 9700X、32 GB、RTX 5070 的结果当成目标机结果。
+- 已知限制：rAF 是主线程回调节奏，不是精确 GPU 呈现帧数；样片为合成图案，本机测试不涵盖真实素材/NAS 延迟与长时内存变化。T23 需补目标机及代表性素材复验。
+- 后续注意：T01 的 Yjs 文档仅内存态；正式画布仍需按 T08 的 T01/T04/T05 依赖推进，不提前接入业务功能。

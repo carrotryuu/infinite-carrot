@@ -1,8 +1,10 @@
 # AI 视频无限画布
 
-当前范围为 T00 工程脚手架。前端只有占位首页；后端只提供基础设施健康检查；worker 只初始化队列连接。业务开发以 docs/tasks.md、docs/decisions.md 和 docs/progress.md 为准。
+当前已交付 T00 工程脚手架，并实现 T01 画布性能 PoC。前端首页可进入 `/poc/canvas`；后端只提供基础设施健康检查；worker 只初始化队列连接。业务开发以 docs/tasks.md、docs/decisions.md 和 docs/progress.md 为准。
 
-在当前 Windows 电脑上，双击根目录的 `start-local.cmd` 可启动 Docker 和项目，等待健康检查通过后打开浏览器。首页目前显示标题及“站点已启动”，实际画布功能尚未开发。
+在当前 Windows 电脑上，双击根目录的 `start-local.cmd` 可启动 Docker 和项目，等待健康检查通过后打开浏览器。首页链接进入 150 节点的性能验证画布；此页面刷新后重置，不是正式业务画布。
+
+T01 的机器配置、三轮实测、测量限制和复现步骤见 [画布性能报告](docs/poc-canvas.md)。目标机测试按用户决定移到 T23 使用测试，45 FPS / 3 秒门槛不变。
 
 本机原 AppData 下 Docker 配置的原子重命名失败（Win32 错误 17），因此 Docker 使用 `.local/docker-profile` 独立运行目录。此目录包含 Docker 配置与运行数据，**不是安装残留，不要删除**。启动脚本只对 Docker 子进程设置 APPDATA/LOCALAPPDATA，不更改系统全局环境。重启电脑后请使用此脚本启动本项目，避免从旧入口再次使用出错的目录。
 

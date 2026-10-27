@@ -1,8 +1,10 @@
 # AI 视频无限画布
 
-当前范围为 T00 工程脚手架。前端只有占位首页；后端只提供基础设施健康检查；worker 只初始化队列连接。业务开发以 docs/tasks.md、docs/decisions.md 和 docs/progress.md 为准。
+当前已交付 T00 工程脚手架，并实现 T01 画布性能 PoC。前端首页可进入 `/poc/canvas`；后端只提供基础设施健康检查；worker 只初始化队列连接。业务开发以 docs/tasks.md、docs/decisions.md 和 docs/progress.md 为准。
 
-在当前 Windows 电脑上，双击根目录的 `start-local.cmd` 可启动 Docker 和项目，等待健康检查通过后打开浏览器。首页目前显示标题及“站点已启动”，实际画布功能尚未开发。
+在当前 Windows 电脑上，双击根目录的 `start-local.cmd` 可启动 Docker 和项目，等待健康检查通过后打开浏览器。首页链接进入 150 节点的性能验证画布；此页面刷新后重置，不是正式业务画布。
+
+T01 的机器配置、三轮实测、测量限制和复现步骤见 [画布性能报告](docs/poc-canvas.md)。目标机测试按用户决定移到 T23 使用测试，45 FPS / 3 秒门槛不变。
 
 本机原 AppData 下 Docker 配置的原子重命名失败（Win32 错误 17），因此 Docker 使用 `.local/docker-profile` 独立运行目录。此目录包含 Docker 配置与运行数据，**不是安装残留，不要删除**。启动脚本只对 Docker 子进程设置 APPDATA/LOCALAPPDATA，不更改系统全局环境。重启电脑后请使用此脚本启动本项目，避免从旧入口再次使用出错的目录。
 
@@ -44,13 +46,13 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm db:validate
-pnpm exec playwright install chromium
+pnpm exec playwright install chrome
 pnpm e2e
 ```
 
 Vitest 的接口测试替换基础设施探针，覆盖健康、故障、恢复、超时和错误信息隔离；NAS 探针测试实际创建并清理临时文件。Playwright 启动本地开发服务，检查页面和 API 代理；未启动数据库等依赖时允许健康接口返回 503。完整健康验收设置 `E2E_REQUIRE_HEALTHY=1`。外部模型与飞书默认 `MOCK_EXTERNAL=1`，T00 不调用它们。
 
-如已安装 Chrome 或 Edge，可在当前终端或 `.env` 设置 `PLAYWRIGHT_CHANNEL=chrome` 或 `msedge` 后运行 `pnpm e2e`，省去 Chromium 下载。终端环境变量优先于 `.env`。
+浏览器测试默认使用已安装的 Chrome；如已有 Chrome，无需再次执行安装命令。设 `PLAYWRIGHT_CHANNEL=msedge` 可测试已安装的 Edge，终端环境变量优先于 `.env`。T01 校验 H.264 解码，CI 同样使用正式 Chrome，不使用缺少相应媒体编解码器的默认 Chromium。
 
 T00 没有业务表，Prisma 只配置数据源与迁移目录；健康检查使用 PostgreSQL 驱动执行 `SELECT 1`。后续业务必须通过 Prisma migration 建表。`pnpm db:migrate:dev` 创建开发迁移，`pnpm db:migrate` 部署已有迁移。`pnpm db:seed` 在 T00 明确报未实现，不伪造演示数据；T03/T04 再加入种子用户与组织。
 

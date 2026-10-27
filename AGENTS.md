@@ -4,6 +4,7 @@
 AI 视频无限画布：公司内网使用的短剧/漫剧生产画布，参考 NeoWow。
 需求全文：docs/requirements.md；任务清单：docs/tasks.md；补充决定：docs/decisions.md（与需求清单冲突时以它为准）；进度：docs/progress.md。没有单独的审核说明书，审核规则见 requirements.md 的 M10、M11 和 tasks.md 的 T12～T18。
 开始任何任务前，先读 docs/progress.md 和本任务涉及的需求章节。
+开始前先核对 docs/tasks.md「任务总览」里本任务的依赖是否都已完成；有未完成的依赖就停下说明，不要提前实现别的任务的内容。
 
 ## 仓库结构
 - apps/web      前端（React + Vite + TS + React Flow + Yjs + Zustand）

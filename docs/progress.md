@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-尚未开工。下一个任务：T00 仓库脚手架与一键部署。
+T00 工程实现与本机验收已完成：五个容器运行，数据库、Redis、NAS 均正常，真实停库/恢复、FFmpeg 和 Chrome/Edge 验收通过。已关联远程仓库 carrotryuu/infinite-carrot；用户授权以当前项目替换原内容并继续。正在完成 GitHub 登录、T00 PR 与合并，完成后再进入 T01。
 
 ## 已定事项（2026-10-26）
 
@@ -14,6 +14,8 @@
 - 飞书内审核：通过、备选、退回仅限有审核权限的导演、执行导演、制片；动画师只接收结论
 - 角色：7 种，美术并入动画师；动画师负责资产生成和定稿，权限矩阵见 docs/decisions.md 第 2 条
 - 审核：没有单独的审核说明书；飞书推送待审卡片，导演可在卡片上直接下结论，细看时跳平台审片页（逐帧、画批）
+- 视频格式：只有 MP4，外部上传拒绝 MOV；归档命名场-镜-vN.mp4；飞书通过需二次确认；改判规则见 docs/decisions.md 第 7 条
+- 生成误点：3 秒内可取消，不扣积分（T10）
 - T01 性能门槛：平移缩放平均 45 FPS，首屏 3 秒以内
 
 ## 待确认
@@ -22,4 +24,31 @@
 
 ## 任务记录
 
-（每个任务完成后由 Codex 在此追加：完成内容、未完成项、已知问题、下个任务要注意的事）
+### T00（2026-10-27）
+
+- 依据：repo-starter(1).zip；分支 codex/t00-scaffold（原本地分支 task/t00-scaffold）。
+- 完成：pnpm 四工作区；React/Vite 首页；NestJS /health（数据库、Redis、NAS 独立检测，故障返回 503，支持恢复）；BullMQ worker 基础进程；TypeScript strict、ESLint、Prettier、Vitest、Playwright；五服务 Compose、Nginx、带 FFmpeg 的 worker 镜像配置；环境变量示例、本地和内网部署说明、CI 配置。
+- 验证通过：pnpm lint、pnpm typecheck、pnpm test（4 个文件、8 项测试）、pnpm build、pnpm db:validate；Chrome 和 Edge 分别通过 2 项端到端测试。浏览器测试允许依赖未启动时返回 503，不代表真实数据库/Redis 已就绪。
+- 额外检查：pnpm format:check 通过；Compose/CI YAML 可解析，五服务及构建路径存在；安装 Docker 后 docker compose config --quiet 通过；.env、下载工具、NAS 测试目录均被 Git 忽略。静态检查不能代替 Docker 验收。
+- 环境：使用应用内置 Node.js 24.19.0 和 Git；pnpm 10.11.0 下载到被忽略的 .tools；已生成依赖锁文件。本机初始无 Docker/WSL，按用户明确要求安装后：WSL 3.0.3、Docker Desktop 4.97.0（当前用户模式，安装器返回 0，Docker Inc 数字签名有效）、Docker CLI 29.9.2、Compose 5.6.1。VirtualMachinePlatform 启用后需要系统重启；本次未重启电脑。
+- 容器验收（重启后完成）：scripts/verify-compose.mjs 通过首页、三项健康检查、真实 PostgreSQL 停止后 503/down 及恢复后 200/ok；五服务运行，server/postgres/redis 健康，worker 日志 ready，容器内 FFmpeg 5.1.9 可运行。
+- PR：远程仓库为 https://github.com/carrotryuu/infinite-carrot；本地说明见 docs/t00-pr.md。原 main 提交 a48419e 已保存为本地备份分支 codex/backup-before-t00-20261027，待登录后推送；更新继承原历史，不强推。
+- 后续注意：T00 未建业务表或演示数据；Prisma 当前仅数据源和迁移目录，健康检查用 pg 执行 SELECT 1。db:seed 明确返回未实现；T03/T04 再加种子数据。不要提前实现后续业务。
+
+#### 重启后排查与清理（2026-10-27）
+
+- Docker 原 AppData 目录保存配置时，原生文件替换返回 Win32 错误 17；该目录带 Encrypted 属性。独立目录的相同操作成功，未断言加密属性是唯一原因，也未修改系统加密设置。
+- 使用 `.local/docker-profile` 保存 Docker 配置与运行数据，仅对启动进程设置 APPDATA/LOCALAPPDATA。引擎已恢复；该目录是活动数据，不是可删除的临时缓存。
+- 新增 `start-local.cmd` 和 `scripts/start-local.ps1`，用于重启后启动 Docker、项目服务并打开首页。首页明确显示画布仍在建设中。
+- 删除本次下载的 Docker 安装器、pnpm 压缩包及诊断临时脚本/日志，释放约 596.1 MiB 磁盘空间；保留 pnpm 工具、项目依赖和 Docker 活动数据。此前已结束失败的 Docker 进程；当前 Docker 多进程属于运行架构，不按同名一律终止。
+- 本次再次通过 lint、typecheck、8 项单元/接口测试和启动脚本语法检查；Chrome、Edge 对容器站点各通过 2 项测试，强制要求真实健康状态为 200，三项依赖均 ok。
+- 构建完成后清理未使用构建缓存，Docker 报告回收 1.185 GB；五个活动镜像、五个容器和两个数据卷保留。清理后健康检查仍全部 ok。此数值是 Docker 内部回收量，不保证 Windows 虚拟磁盘立即缩小。
+
+#### 后续启动与复验
+
+1. 当前机器使用根目录 `start-local.cmd` 启动；直接使用原 Docker 快捷方式可能再次命中原 AppData 配置写入问题。
+2. Docker CLI 位于 `%LOCALAPPDATA%/Programs/DockerDesktop/resources/bin/docker.exe`。当前终端若尚未刷新 PATH，使用此路径或重新打开终端。
+3. Node 位于 `%USERPROFILE%/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`；pnpm 入口为 `.tools/package/bin/pnpm.cjs`。将 Node 目录、仓库 `.tools` 和 Docker CLI 目录临时加到 PATH 后可使用 pnpm.cmd。
+4. 根目录已有被忽略的 .env，NAS_ROOT 指向 `D:/infinite-carrot/.local/nas`，本地数据库密码已随机生成；不要打印 .env 内容。
+5. 执行 `node scripts/verify-compose.mjs`，检查 worker 容器内 FFmpeg，设置 E2E_BASE_URL 指向容器首页且 E2E_REQUIRE_HEALTHY=1 后重跑浏览器验收。
+6. 更新此进度及 docs/t00-pr.md；有远程仓库后再创建 PR。

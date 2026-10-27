@@ -1,0 +1,92 @@
+name: infinite-carrot
+
+services:
+  web:
+    build: { context: .., dockerfile: deploy/Dockerfile, target: web }
+    ports:
+      - '${WEB_PORT:-80}:80'
+    depends_on:
+      server: { condition: service_started }
+    restart: unless-stopped
+
+  server:
+    build: { context: .., dockerfile: deploy/Dockerfile, target: server }
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      SERVER_PORT: 3000
+      DATABASE_URL: 'postgresql://${POSTGRES_USER:-carrot}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-carrot}'
+      REDIS_URL: redis://redis:6379/0
+      NAS_ROOT: /nas
+    volumes:
+      - type: bind
+        source: ${NAS_ROOT:?Set NAS_ROOT to an existing absolute directory}
+        target: /nas
+        bind: { create_host_path: false }
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    init: true
+
+  worker:
+    build: { context: .., dockerfile: deploy/Dockerfile, target: worker }
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: 'postgresql://${POSTGRES_USER:-carrot}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-carrot}'
+      REDIS_URL: redis://redis:6379/0
+      NAS_ROOT: /nas
+    volumes:
+      - type: bind
+        source: ${NAS_ROOT:?Set NAS_ROOT}
+        target: /nas
+        bind: { create_host_path: false }
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+    init: true
+
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-carrot}
+      POSTGRES_USER: ${POSTGRES_USER:-carrot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-bookworm
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:

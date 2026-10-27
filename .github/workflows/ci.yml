@@ -1,0 +1,35 @@
+name: T00 checks
+on: [push, pull_request]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: carrot
+          POSTGRES_USER: carrot
+          POSTGRES_PASSWORD: test-only
+        ports: ['5432:5432']
+        options: --health-cmd="pg_isready -U carrot" --health-interval=5s --health-timeout=3s --health-retries=10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=3s --health-retries=10
+    env:
+      DATABASE_URL: postgresql://carrot:test-only@127.0.0.1:5432/carrot
+      REDIS_URL: redis://127.0.0.1:6379/0
+      NAS_ROOT: ${{ runner.temp }}/carrot-nas
+      MOCK_EXTERNAL: '1'
+      E2E_REQUIRE_HEALTHY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: mkdir -p "$NAS_ROOT"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck && pnpm test
+      - run: pnpm build && pnpm db:validate
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e

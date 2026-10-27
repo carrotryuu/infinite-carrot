@@ -31,6 +31,8 @@ New-Item -ItemType Directory -Force .local/nas
 ```sh
 pnpm install --frozen-lockfile
 docker compose --env-file .env -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml up -d postgres redis
+pnpm db:generate
+pnpm db:migrate
 pnpm dev
 ```
 

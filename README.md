@@ -46,13 +46,13 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm db:validate
-pnpm exec playwright install chromium
+pnpm exec playwright install chrome
 pnpm e2e
 ```
 
 Vitest 的接口测试替换基础设施探针，覆盖健康、故障、恢复、超时和错误信息隔离；NAS 探针测试实际创建并清理临时文件。Playwright 启动本地开发服务，检查页面和 API 代理；未启动数据库等依赖时允许健康接口返回 503。完整健康验收设置 `E2E_REQUIRE_HEALTHY=1`。外部模型与飞书默认 `MOCK_EXTERNAL=1`，T00 不调用它们。
 
-如已安装 Chrome 或 Edge，可在当前终端或 `.env` 设置 `PLAYWRIGHT_CHANNEL=chrome` 或 `msedge` 后运行 `pnpm e2e`，省去 Chromium 下载。终端环境变量优先于 `.env`。
+浏览器测试默认使用已安装的 Chrome；如已有 Chrome，无需再次执行安装命令。设 `PLAYWRIGHT_CHANNEL=msedge` 可测试已安装的 Edge，终端环境变量优先于 `.env`。T01 校验 H.264 解码，CI 同样使用正式 Chrome，不使用缺少相应媒体编解码器的默认 Chromium。
 
 T00 没有业务表，Prisma 只配置数据源与迁移目录；健康检查使用 PostgreSQL 驱动执行 `SELECT 1`。后续业务必须通过 Prisma migration 建表。`pnpm db:migrate:dev` 创建开发迁移，`pnpm db:migrate` 部署已有迁移。`pnpm db:seed` 在 T00 明确报未实现，不伪造演示数据；T03/T04 再加入种子用户与组织。
 

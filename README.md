@@ -24,7 +24,7 @@ Copy-Item .env.example .env
 New-Item -ItemType Directory -Force .local/nas
 ```
 
-编辑 `.env`：`NAS_ROOT` 填刚才目录的绝对路径（Windows 示例 `D:/infinite-carrot/.local/nas`）；修改 POSTGRES_PASSWORD，并同步修改 DATABASE_URL 中的密码。密码使用 URL 安全字符，推荐长随机十六进制串。服务端密钥禁止使用 `VITE_` 前缀。
+编辑 `.env`：`NAS_ROOT` 填刚才目录的绝对路径（Windows 示例 `D:/infinite-carrot/.local/nas`）；修改 POSTGRES*PASSWORD，并同步修改 DATABASE_URL 中的密码。密码使用 URL 安全字符，推荐长随机十六进制串。服务端密钥禁止使用 `VITE*` 前缀。
 
 ```sh
 pnpm install --frozen-lockfile

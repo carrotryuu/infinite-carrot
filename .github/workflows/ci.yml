@@ -19,7 +19,6 @@ jobs:
     env:
       DATABASE_URL: postgresql://carrot:test-only@127.0.0.1:5432/carrot
       REDIS_URL: redis://127.0.0.1:6379/0
-      NAS_ROOT: ${{ runner.temp }}/carrot-nas
       MOCK_EXTERNAL: '1'
       E2E_REQUIRE_HEALTHY: '1'
     steps:
@@ -27,7 +26,10 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: pnpm }
-      - run: mkdir -p "$NAS_ROOT"
+      - name: Prepare test NAS directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/carrot-nas"
+          echo "NAS_ROOT=$RUNNER_TEMP/carrot-nas" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint && pnpm typecheck && pnpm test
       - run: pnpm build && pnpm db:validate

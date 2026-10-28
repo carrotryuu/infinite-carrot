@@ -184,8 +184,8 @@ describe.runIf(process.env.AUTH_INTEGRATION_TESTS === '1')(
       await request(app.getHttpServer()).get('/auth/me').expect(401);
       const logged = await login('editor').expect(201);
       const keys = await runtime.redis.keys(`${runtime.namespace}:session:*`);
-    for (const key of keys) await runtime.redis.pexpire(key, 1);
-    await new Promise((resolve) => setTimeout(resolve, 20));
+      for (const key of keys) await runtime.redis.pexpire(key, 1);
+      await new Promise((resolve) => setTimeout(resolve, 20));
       await request(app.getHttpServer())
         .get('/auth/me')
         .set('Cookie', sessionCookie(logged))

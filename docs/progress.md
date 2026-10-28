@@ -4,6 +4,8 @@
 
 T00 已完成并通过 PR #2 合并（5f839d2），旧版备份分支已推送。T01 画布性能 PoC 工程与本机实测已完成，PR #3 已合并（b51bfb2）；目标机验收按用户新决定移到 T23 使用测试，不阻塞 T01 当前交付，45 FPS / 3 秒门槛保持不变。
 
+T02 PR #4 已按用户要求合并（c886398），真实模型测试待放行后补做，进入 T06 时提醒。T03 Mock 登录与账号正在验收，真实飞书联调待权限与网络开通。
+
 ## 已定事项（2026-10-26）
 
 - 技术栈：TypeScript 全栈（React + NestJS + Prisma + PostgreSQL + Redis/BullMQ），pnpm 单仓
@@ -74,6 +76,21 @@ T00 已完成并通过 PR #2 合并（5f839d2），旧版备份分支已推送�
 - 未完成：真实方舟调用与耗时记录；须依 AGENTS.md 第 12 条先确认网络放行和本机密钥配置，未调用收费模型，不能将 Mock 验收写成真实验收。
 - 已知边界：真实供应商幂等支持未确认，提交结果不确定时停止自动重发并要求人工对账。PoC 固定测试组，不替代 T03/T04；不含积分与文件落盘。详见 docs/poc-gateway.md。
 - 浏览器最终验收：对生产容器站点，Chrome、Edge 各 5 项全部通过（包含真实健康检查、画布回归、20 任务实时更新和刷新恢复）。首次与崩溃验收并行运行因共享队列等待超时，分开运行后通过；截图检查正常。format:check、Prisma validate 通过。
-- PR：https://github.com/carrotryuu/infinite-carrot/pull/4（草稿，未合并）。用户确认真实联调条件尚未具备，保留待办；保持 MOCK_EXTERNAL=1，不调用真实模型。云端检查状态以 PR 为准。
+- PR：https://github.com/carrotryuu/infinite-carrot/pull/4（已于 2026-10-28 合并，c886398）。用户确认真实联调条件尚未具备，保留待办；保持 MOCK_EXTERNAL=1，不调用真实模型。云端检查状态以 PR 为准。
 
 - 2026-10-28 用户决定：先合并 T02，真实模型测试待放行后补做；不阻塞 T03 开发。进入 T06 时必须先提醒用户补做 T02 真实模型联调，确认网络、密钥和模型权限，未获确认继续 Mock。
+
+### T03（2026-10-28）
+
+- 依赖：任务总览仅要求 T00，已合并；用户已明确允许 T02 先合并、真实模型测试待放行后补做。分支 codex/t03-auth。
+- 完成：users Prisma migration；组织身份专用 TeamScope；union_id 唯一、首次待分配、重复同步姓名/头像；Redis 七天会话与 HttpOnly/SameSite Cookie；OAuth state 浏览器绑定、单次消费、PKCE、企业 tenant_key 校验；Mock 七个演示身份；登录/回调/账号页；退出；账号停用与会话版本撤销。
+- 边界：不提前实现 T04 的组、项目、角色或账号管理页面。身份分区 team_id 不代表组归属；七个演示名称不授予角色。停用服务校验 account.manage，T04 后续通过正式授权接口复用。
+- 验证：lint、typecheck、Prisma validate 通过；真实 PostgreSQL/Redis 的 26 项 Vitest 测试通过；迁移与七人种子已在本机执行。浏览器最终结果待下方记录。
+- 部署：T03 server/web 镜像已构建并部署；worker 业务未变，继续使用 T02 已验证镜像。全量构建因上游 Node 基础镜像更新触发 FFmpeg 重新下载，已停止本任务不需要的 worker 重建。未修改或删除 Docker 活动数据。
+- 未完成：真实飞书账号联调。PR 的待开通权限/待放行地址见 docs/t03-pr.md，须按 AGENTS.md 第 11、12 条确认后执行，不能把 Mock 验收写成真实成功。
+- 下个任务注意：T04 尚需两组、三项目、角色与 memberships；复用会话版本停用服务，新增正式权限路由。进入 T06 必须提醒补做 T02 真实模型测试，tasks.md 已加入开始前提醒。
+- 最终验收：Chrome、Edge 对生产容器各 7 项全部通过，包括登录/待分配/退出、真实停用后 401 跳转、画布与 20 任务网关回归。登录页截图检查正常，Nginx 配置检查通过，OAuth 查询参数已从访问日志移除。format:check 通过。
+- 环境问题：首次完整回归遇到重建数据库/Redis 后旧 worker 初始化失败，模型任务超时；依赖健康后重启 worker，积压恢复，重跑全部通过。后续基础设施重启应检查 worker ready，不能只看容器仍存活。
+- PR：https://github.com/carrotryuu/infinite-carrot/pull/5（草稿，未合并）。实现提交 4c4bf53 的 push/PR 两轮 CI 均通过。用户已确认飞书联调条件尚未准备好，保留 T03 真实联调待办，不启用真实外部服务。
+
+- 2026-10-28 用户要求进行 T04，真实飞书接入稍后补做；据此先合并 T03 作为依赖，保留真实联调待办。

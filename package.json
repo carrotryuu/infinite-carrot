@@ -20,7 +20,7 @@
     "db:generate": "pnpm --filter @carrot/server exec prisma generate",
     "db:migrate": "dotenv -e .env -- pnpm --filter @carrot/server exec prisma migrate deploy",
     "db:migrate:dev": "dotenv -e .env -- pnpm --filter @carrot/server exec prisma migrate dev",
-    "db:seed": "node scripts/seed.mjs"
+    "db:seed": "pnpm --filter @carrot/shared build && dotenv -e .env -- pnpm --filter @carrot/server exec tsx src/auth/seed.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.35.0",

@@ -15,6 +15,7 @@ services:
     environment:
       NODE_ENV: production
       SERVER_PORT: 3000
+      AUTH_PUBLIC_ORIGIN: ${AUTH_DEPLOY_ORIGIN:-http://127.0.0.1}
       DATABASE_URL: 'postgresql://${POSTGRES_USER:-carrot}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-carrot}'
       REDIS_URL: redis://redis:6379/0
       NAS_ROOT: /nas

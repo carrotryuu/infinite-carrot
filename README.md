@@ -56,7 +56,7 @@ Vitest 的接口测试替换基础设施探针，覆盖健康、故障、恢复�
 
 浏览器测试默认使用已安装的 Chrome；如已有 Chrome，无需再次执行安装命令。设 `PLAYWRIGHT_CHANNEL=msedge` 可测试已安装的 Edge，终端环境变量优先于 `.env`。T01 校验 H.264 解码，CI 同样使用正式 Chrome，不使用缺少相应媒体编解码器的默认 Chromium。
 
-T02 已通过 Prisma migration 加入 generation_tasks 和只追加的 audit_logs；健康检查使用 PostgreSQL 驱动执行 `SELECT 1`。后续业务必须通过 Prisma migration 建表。`pnpm db:migrate:dev` 创建开发迁移，`pnpm db:migrate` 部署已有迁移。`pnpm db:seed` 在 T00 明确报未实现，不伪造演示数据；T03/T04 再加入种子用户与组织。
+T02 已通过 Prisma migration 加入 generation_tasks 和只追加的 audit_logs；健康检查使用 PostgreSQL 驱动执行 `SELECT 1`。后续业务必须通过 Prisma migration 建表。`pnpm db:migrate:dev` 创建开发迁移，`pnpm db:migrate` 部署已有迁移。`pnpm db:seed` 在 Mock 模式准备七个演示身份；组、项目与正式角色留给 T04。
 
 ## 内网部署
 
@@ -108,3 +108,7 @@ T00 不涉及飞书权限或模型 API 放行；模型 ID、凭据和业务实�
 ## T02 模型网关
 
 设置 POC_GATEWAY_ENABLED=1、MOCK_EXTERNAL=1 后访问 /poc/gateway。默认并发 4，Mock 随机 10～30 秒完成；生产容器启动时自动部署迁移。协议、恢复边界、验收命令和真实联调前置条件见 [网关 PoC 报告](docs/poc-gateway.md)。真实模型密钥只能配置在服务端环境，不能提交 Git。
+
+## T03 登录与账号
+
+访问 /login 选择 Mock 账号，首次登录进入待分配页；/account 显示姓名、头像和退出。开发 origin 使用 AUTH_PUBLIC_ORIGIN，容器 origin 使用 AUTH_DEPLOY_ORIGIN。配置、会话与停用机制见 [登录说明](docs/auth.md)。真实飞书联调需先开通权限与放行网络，当前尚未完成。

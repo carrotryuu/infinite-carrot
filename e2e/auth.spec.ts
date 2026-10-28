@@ -3,7 +3,7 @@ import { AuthRuntime } from '../apps/server/src/auth/runtime';
 import { readAuthConfig, IDENTITY_SCOPE } from '../apps/server/src/auth/config';
 import { Permission } from '../packages/shared/permissions';
 
-test('mock login shows pending assignment, survives reload and logout revokes the session', async ({
+test('mock login enters assigned workspace, survives reload and logout revokes the session', async ({
   page,
   context,
 }) => {
@@ -13,14 +13,14 @@ test('mock login shows pending assignment, survives reload and logout revokes th
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('heading', { name: '登录无限画布' })).toBeVisible();
   await page.getByRole('button', { name: '演示导演', exact: true }).click();
-  await expect(page.getByRole('heading', { name: '等待管理员分配' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '工作空间' })).toBeVisible();
   await expect(page.locator('header')).toContainText('演示导演');
   const cookie = (await context.cookies()).find((value) => value.name === 'carrot_session');
   expect(cookie?.httpOnly).toBe(true);
   expect(cookie?.sameSite).toBe('Lax');
   expect(await page.evaluate(() => document.cookie)).not.toContain('carrot_session');
   await page.reload();
-  await expect(page.getByRole('heading', { name: '等待管理员分配' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '工作空间' })).toBeVisible();
   await page.getByRole('button', { name: '退出登录' }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/account');
@@ -45,14 +45,15 @@ test('disabling an account makes its next request return 401 and redirects the o
   try {
     await page.goto('/login');
     await page.getByRole('button', { name: '演示剪辑', exact: true }).click();
-    await expect(page.getByRole('heading', { name: '等待管理员分配' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '工作空间' })).toBeVisible();
     const profile = await page.request.get('/api/auth/me');
     id = ((await profile.json()) as { id: string }).id;
     await runtime.repository.setStatus(id, 'disabled', actor);
     const unauthorized = page.waitForResponse(
-      (response) => response.url().endsWith('/api/auth/me') && response.status() === 401,
+      (response) =>
+        response.url().endsWith('/api/organization/context') && response.status() === 401,
     );
-    await page.getByRole('button', { name: '刷新账号状态' }).click();
+    await page.reload();
     await unauthorized;
     await expect(page).toHaveURL(/\/login$/);
     await page.getByRole('button', { name: '演示剪辑', exact: true }).click();

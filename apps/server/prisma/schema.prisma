@@ -71,6 +71,77 @@ model User {
   sessionVersion Int        @default(0) @map("session_version")
   createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  memberships    Membership[]
   @@index([teamId, tenantId, status])
   @@map("users")
+}
+
+model Team {
+  id          String @id @default(uuid()) @db.Uuid
+  teamId      String @map("team_id") @db.Uuid
+  tenantId    String? @map("tenant_id") @db.Uuid
+  name        String @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  projects    Project[]
+  memberships Membership[]
+  @@map("teams")
+}
+model Project {
+  id          String @id @default(uuid()) @db.Uuid
+  teamId      String @map("team_id") @db.Uuid
+  tenantId    String? @map("tenant_id") @db.Uuid
+  name        String @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  team        Team @relation(fields: [teamId], references: [id])
+  memberships Membership[]
+  @@unique([teamId, id])
+  @@index([teamId, tenantId])
+  @@map("projects")
+}
+model Role {
+  id          String @id @default(uuid()) @db.Uuid
+  teamId      String @map("team_id") @db.Uuid
+  tenantId    String? @map("tenant_id") @db.Uuid
+  key         String @unique @db.VarChar(30)
+  name        String @db.VarChar(50)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  permissions RolePermission[]
+  memberships Membership[]
+  @@map("roles")
+}
+model PermissionDefinition {
+  id       String @id @default(uuid()) @db.Uuid
+  teamId   String @map("team_id") @db.Uuid
+  tenantId String? @map("tenant_id") @db.Uuid
+  point    String @unique @db.VarChar(60)
+  roles    RolePermission[]
+  @@map("permissions")
+}
+model RolePermission {
+  id           String @id @default(uuid()) @db.Uuid
+  teamId       String @map("team_id") @db.Uuid
+  tenantId     String? @map("tenant_id") @db.Uuid
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+  role         Role @relation(fields: [roleId], references: [id])
+  permission   PermissionDefinition @relation(fields: [permissionId], references: [id])
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+model Membership {
+  id        String @id @default(uuid()) @db.Uuid
+  teamId    String @map("team_id") @db.Uuid
+  tenantId  String? @map("tenant_id") @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  roleId    String @map("role_id") @db.Uuid
+  projectId String? @map("project_id") @db.Uuid
+  scopeKey  String @map("scope_key") @db.VarChar(36)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  user      User @relation(fields: [userId], references: [id])
+  team      Team @relation(fields: [teamId], references: [id])
+  project   Project? @relation(fields: [teamId, projectId], references: [teamId, id])
+  role      Role @relation(fields: [roleId], references: [id])
+  @@unique([userId, teamId, scopeKey])
+  @@index([teamId, tenantId, projectId])
+  @@map("memberships")
 }

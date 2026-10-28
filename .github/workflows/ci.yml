@@ -24,6 +24,7 @@ jobs:
       POC_GATEWAY_ENABLED: '1'
       GATEWAY_INTEGRATION_TESTS: '1'
       AUTH_INTEGRATION_TESTS: '1'
+      ORGANIZATION_INTEGRATION_TESTS: '1'
       AUTH_PUBLIC_ORIGIN: http://127.0.0.1:5173
       MOCK_MIN_MS: '1000'
       MOCK_MAX_MS: '1500'
@@ -40,7 +41,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate && pnpm db:migrate
       - run: pnpm lint && pnpm typecheck && pnpm test
-      - run: pnpm build && pnpm db:validate
+      - run: pnpm build && pnpm db:validate && pnpm db:seed
       - run: pnpm exec playwright install --with-deps chrome
       - run: pnpm e2e
       - uses: actions/upload-artifact@v4

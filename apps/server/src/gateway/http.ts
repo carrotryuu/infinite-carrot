@@ -28,6 +28,7 @@ import { readGatewayConfig, type GatewayConfig } from './config';
 import { GatewayRuntime } from './runtime';
 import { taskView } from './repository';
 import type { ScopeContext } from './team-scope';
+import { Public } from '../organization/policy';
 
 interface PocRequest {
   headers: IncomingHttpHeaders;
@@ -100,6 +101,7 @@ export class PermissionGuard implements CanActivate {
   }
 }
 @Controller('poc/gateway')
+@Public('Isolated PoC; gateway enable gate, origin/token validation and local permission guard')
 @UseGuards(PermissionGuard)
 export class GatewayController {
   constructor(@Inject(GatewayService) private readonly service: GatewayService) {}

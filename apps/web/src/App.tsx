@@ -3,8 +3,15 @@ import { lazy, Suspense } from 'react';
 const CanvasPoc = lazy(() => import('./poc/CanvasPoc'));
 const GatewayPoc = lazy(() => import('./poc/GatewayPoc'));
 const AccountPage = lazy(() => import('./auth/AccountPage'));
+const Workspace = lazy(() => import('./organization/Workspace'));
 
 export function App() {
+  if (typeof window !== 'undefined' && window.location.pathname === '/workspace')
+    return (
+      <Suspense fallback={<main>正在载入工作空间…</main>}>
+        <Workspace />
+      </Suspense>
+    );
   if (
     typeof window !== 'undefined' &&
     ['/login', '/auth/callback', '/account'].includes(window.location.pathname)

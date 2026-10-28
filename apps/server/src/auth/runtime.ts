@@ -81,6 +81,22 @@ export class AuthRuntime {
       pendingAssignment: !user.assigned,
     };
   }
+  async currentTeam(token: string) {
+    await this.me(token);
+    const raw = await this.redis.get(this.key(token));
+    if (!raw) throw new UnauthorizedException();
+    return (JSON.parse(raw) as { currentTeamId?: string }).currentTeamId ?? null;
+  }
+  async selectTeam(token: string, teamId: string) {
+    await this.me(token);
+    const changed = await this.redis.eval(
+      "local v=redis.call('GET',KEYS[1]); if not v then return 0 end; local s=cjson.decode(v); s.currentTeamId=ARGV[1]; redis.call('SET',KEYS[1],cjson.encode(s),'KEEPTTL'); return 1",
+      1,
+      this.key(token),
+      teamId,
+    );
+    if (!changed) throw new UnauthorizedException();
+  }
   async begin() {
     if (this.config.MOCK_EXTERNAL !== '0') throw new UnauthorizedException();
     const state = random();

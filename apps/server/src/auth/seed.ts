@@ -1,5 +1,6 @@
 import { AuthRuntime } from './runtime';
-import { mockPeople, readAuthConfig } from './config';
+import { readAuthConfig } from './config';
+import { seedOrganization } from '../organization/seed';
 
 async function seed() {
   const config = readAuthConfig();
@@ -7,15 +8,9 @@ async function seed() {
   const runtime = new AuthRuntime(config);
   try {
     await runtime.start();
-    for (const person of mockPeople) {
-      await runtime.repository.login({
-        unionId: `auth:mock:${person.id}`,
-        name: person.name,
-        avatarUrl: null,
-      });
-    }
+    await seedOrganization(runtime);
     console.log(
-      'Seven Mock identities are ready. Teams, projects and role assignments remain T04 work.',
+      'Two teams, three projects and seven role identities are ready. Existing assignments are preserved.',
     );
   } finally {
     await runtime.close();

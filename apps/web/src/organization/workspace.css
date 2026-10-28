@@ -1,0 +1,124 @@
+.workspace {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: #f5f7f3;
+  color: #223b2c;
+  padding: 28px 5vw;
+  font-family: system-ui, sans-serif;
+}
+.workspace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+.workspace-header > a {
+  font-weight: 700;
+  font-size: 22px;
+  color: inherit;
+  text-decoration: none;
+}
+.workspace-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.workspace-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #dce9d9;
+  display: grid;
+  place-items: center;
+  object-fit: cover;
+}
+.workspace h1 {
+  margin-top: 44px;
+}
+.workspace nav {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+}
+.workspace button,
+.workspace select {
+  padding: 10px 14px;
+  border: 1px solid #b8cbb5;
+  border-radius: 7px;
+  background: white;
+  color: #264932;
+  font: inherit;
+}
+.workspace button {
+  cursor: pointer;
+}
+.workspace button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.workspace button[aria-pressed='true'],
+.workspace .workspace-primary {
+  background: #345c40;
+  color: white;
+}
+.workspace-panel {
+  padding: 26px;
+  background: white;
+  border: 1px solid #dbe5d8;
+  border-radius: 12px;
+  margin: 12px 0;
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+}
+.workspace-muted {
+  color: #637766;
+}
+.workspace-error {
+  color: #a12820;
+}
+.workspace-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.membership-rows fieldset {
+  border: 1px solid #dbe5d8;
+  border-radius: 8px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 18px;
+  margin: 18px 0;
+}
+.workspace label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.workspace li {
+  margin: 8px 0;
+}
+@media (max-width: 700px) {
+  .workspace-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .workspace nav {
+    flex-wrap: wrap;
+  }
+  .workspace {
+    padding: 20px;
+  }
+  .workspace-controls {
+    gap: 8px;
+  }
+  .workspace label {
+    flex-wrap: wrap;
+  }
+}

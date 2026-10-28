@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-10-27T14:01:05.697Z",
+  "mode": "mock",
+  "providerConcurrency": 4,
+  "duplicateRequests": 8,
+  "uniqueTaskCount": 1,
+  "forcedWorkerKill": true,
+  "recoveredStatus": "succeeded",
+  "providerSubmissionCount": 1,
+  "batchTasks": 20,
+  "batchSucceeded": 20,
+  "elapsedMs": 137581
+}

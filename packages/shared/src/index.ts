@@ -1,4 +1,6 @@
 import { z } from 'zod';
+export { Permission } from '../permissions';
+export * from './gateway';
 
 export const dependencyStatusSchema = z.enum(['ok', 'down']);
 export const healthSchema = z.object({

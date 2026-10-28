@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@carrot/server": "workspace:*",
     "@carrot/shared": "workspace:*",
     "bullmq": "5.58.5",
     "ioredis": "5.7.0"

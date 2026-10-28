@@ -1,4 +1,7 @@
-FROM node:22-bookworm-slim AS build
+FROM node:22-bookworm-slim AS runtime-base
+RUN apt-get update && apt-get install --yes --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+
+FROM runtime-base AS build
 WORKDIR /app
 RUN npm install --global pnpm@10.11.0
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
@@ -10,13 +13,13 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:22-bookworm-slim AS server
+FROM runtime-base AS server
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /app /app
 USER node
 EXPOSE 3000
-CMD ["node", "apps/server/dist/main.js"]
+CMD ["sh", "-c", "node apps/server/node_modules/prisma/build/index.js migrate deploy --schema apps/server/prisma/schema.prisma && exec node apps/server/dist/main.js"]
 
 FROM node:22-bookworm-slim AS worker
 RUN apt-get update && apt-get install --yes --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*

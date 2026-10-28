@@ -19,6 +19,7 @@ import {
 import type { IncomingHttpHeaders } from 'node:http';
 import { AuthRuntime } from './runtime';
 import { mockPeople, readAuthConfig, SESSION_SECONDS } from './config';
+import { Public, Authenticated } from '../organization/policy';
 
 interface AuthRequest {
   headers: IncomingHttpHeaders;
@@ -55,6 +56,7 @@ export class SessionGuard implements CanActivate {
   }
 }
 @Controller('auth')
+@Public('Login bootstrap and OAuth callbacks; mutations verify origin/state')
 export class AuthController {
   constructor(@Inject(AuthService) private readonly service: AuthService) {}
   private get runtime() {
@@ -89,6 +91,7 @@ export class AuthController {
     return { ok: true };
   }
   @Get('me')
+  @Authenticated()
   @UseGuards(SessionGuard)
   me(@Req() req: AuthRequest, @Res({ passthrough: true }) res: AuthResponse) {
     res.setHeader('Cache-Control', 'no-store');

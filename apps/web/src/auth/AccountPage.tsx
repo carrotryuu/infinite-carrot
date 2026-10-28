@@ -20,7 +20,12 @@ export default function AccountPage() {
       return;
     }
     if (!response.ok) throw new Error('暂时无法读取账号，请稍后重试。');
-    setAccount((await response.json()) as Account);
+    const profile = (await response.json()) as Account;
+    if (!profile.pendingAssignment) {
+      window.location.replace('/workspace');
+      return;
+    }
+    setAccount(profile);
   }
   useEffect(() => {
     if (login) {
@@ -101,7 +106,7 @@ export default function AccountPage() {
             {config?.mode === 'mock' && (
               <>
                 <p className="account-notice">
-                  当前为测试环境，请选择一个演示账号。名称仅用于区分账号，不代表已授予对应角色。
+                  当前为测试环境，请选择一个演示账号。实际权限以管理员分配为准，不能由账号名称推断。
                 </p>
                 <div className="account-choices">
                   {config.people.map((person) => (

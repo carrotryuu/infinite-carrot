@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { Permission, terminalStatuses, type TaskView } from '@carrot/shared';
-import { usePermission } from '../auth/usePermission';
+import { usePocPermission } from '../auth/usePermission';
 import './gateway.css';
 
 const statusNames = {
@@ -28,7 +28,7 @@ export default function GatewayPoc() {
   const [updates, setUpdates] = useState(0);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const canSubmit = usePermission(config?.permissions ?? [], Permission.CanvasUse);
+  const canSubmit = usePocPermission(config?.permissions ?? [], Permission.CanvasUse);
   const request = useCallback(
     async (path: string, body?: object) => {
       const response = await fetch(`/api/poc/gateway/${path}`, {

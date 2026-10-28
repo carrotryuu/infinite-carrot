@@ -13,6 +13,7 @@ import {
 import { readInfrastructureEnv, type Health } from '@carrot/shared';
 import Redis from 'ioredis';
 import { Pool } from 'pg';
+import { Public } from './organization/policy';
 
 export const PROBES = Symbol('infrastructure probes');
 export interface Probes {
@@ -107,6 +108,7 @@ export class HealthService {
 }
 
 @Controller('health')
+@Public('Infrastructure health probe contains no credentials')
 export class HealthController {
   constructor(@Inject(HealthService) private readonly health: HealthService) {}
   @Get()

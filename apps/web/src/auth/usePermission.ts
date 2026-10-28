@@ -10,7 +10,11 @@ export const PermissionsContext = createContext<OrganizationContext | null>(null
 export function usePermission(point: Permission, projectId?: string) {
   const context = useContext(PermissionsContext);
   if (!context) return false;
-  if (point === Permission.AccountManage || point === Permission.GlobalView)
+  if (
+    point === Permission.AccountManage ||
+    point === Permission.GlobalView ||
+    point === Permission.TeamCreate
+  )
     return context.organizationPermissions.includes(point);
   return (
     (projectId

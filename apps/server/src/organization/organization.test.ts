@@ -13,6 +13,7 @@ import { AuthService } from '../auth/http';
 import { ServerAppModule } from '../app';
 import { TeamScope } from '../gateway/team-scope';
 import { seedOrganization } from './seed';
+import { COMPANY_TEAM_ID } from './constants';
 import { ACCESS_POLICY, GLOBAL_READABLE, type AccessPolicy } from './policy';
 
 @Controller('missing-policy-test')
@@ -23,7 +24,7 @@ class MissingPolicyController {
 }
 it('defines the exact seven-role matrix with no editor/owner writes or animator review', () => {
   expect(roleDefinitions).toHaveLength(7);
-  expect(Object.values(Permission)).toHaveLength(10);
+  expect(Object.values(Permission)).toHaveLength(12);
   expect(roleDefinitions.find((r) => r.key === 'editor')!.permissions).toEqual([
     Permission.CanvasView,
   ]);
@@ -80,7 +81,7 @@ describe.runIf(process.env.ORGANIZATION_INTEGRATION_TESTS === '1')(
         await db.project.create({
           data: { id: id!, teamId: teamId!, tenantId: null, name: name! },
         });
-      for (const key of ['director', 'animator', 'editor', 'owner', 'hrbp', 'new']) {
+      for (const key of ['director', 'producer', 'animator', 'editor', 'owner', 'hrbp', 'new']) {
         const token = await runtime.login({
           unionId: randomUUID(),
           name: 'Test ' + key,
@@ -246,6 +247,63 @@ describe.runIf(process.env.ORGANIZATION_INTEGRATION_TESTS === '1')(
         .set('Origin', 'https://evil.example')
         .send({ memberships: [] })
         .expect(403);
+    });
+    it('HRBP creates groups while director/producer create projects with server-enforced ownership', async () => {
+      const name = '新建组-' + randomUUID();
+      const created = await post('hrbp', '/organization/teams', { name }).expect(201);
+      expect(await db.team.findFirst({ where: { id: created.body.id } })).toMatchObject({
+        name,
+        teamId: created.body.id,
+      });
+      await post('hrbp', '/organization/teams', { name }).expect(400);
+      await post('director', '/organization/teams', { name: '不允许' }).expect(403);
+      await post('owner', '/organization/teams', { name: '不允许' }).expect(403);
+      await post('director', '/organization/current-team', { teamId: a }).expect(201);
+      const direct = await post('director', '/teams/' + a + '/projects', {
+        name: '导演项目',
+      }).expect(201);
+      expect(direct.body.teamId).toBe(a);
+      await post('animator', '/teams/' + a + '/projects', { name: '无权创建' }).expect(403);
+      await post('producer', '/teams/' + a + '/projects', { name: '伪造归属', teamId: a }).expect(
+        400,
+      );
+      const produced = await post('producer', '/teams/' + a + '/projects', {
+        name: '公司项目',
+      }).expect(201);
+      expect(produced.body.teamId).toBe(COMPANY_TEAM_ID);
+      await post('producer', '/organization/current-team', { teamId: COMPANY_TEAM_ID }).expect(201);
+      await get('producer', '/teams/' + COMPANY_TEAM_ID + '/projects/' + produced.body.id).expect(
+        200,
+      );
+      await post('producer', '/teams/' + COMPANY_TEAM_ID + '/projects', {
+        name: '第二个公司项目',
+      }).expect(201);
+      await grant('animator', COMPANY_TEAM_ID, 'animator');
+      await post('animator', '/organization/current-team', { teamId: COMPANY_TEAM_ID }).expect(201);
+      await get('animator', '/teams/' + COMPANY_TEAM_ID + '/projects/' + produced.body.id).expect(
+        404,
+      );
+      expect((await get('animator', '/organization/context')).body.projects).toEqual([]);
+      await grant('animator', COMPANY_TEAM_ID, 'animator', produced.body.id);
+      await get('animator', '/teams/' + COMPANY_TEAM_ID + '/projects/' + produced.body.id).expect(
+        200,
+      );
+      expect(
+        await db.auditLog.count({ where: { objectId: created.body.id, action: 'team.created' } }),
+      ).toBe(1);
+      expect(
+        await TeamScope.prototype.client
+          .call(
+            new TeamScope({
+              teamId: COMPANY_TEAM_ID,
+              tenantId: null,
+              actor: 'test',
+              permissions: [],
+            }),
+            runtime.prisma,
+          )
+          .auditLog.count({ where: { objectId: produced.body.id, action: 'project.created' } }),
+      ).toBe(1);
     });
     it('HRBP disable invalidates existing sessions and re-enabling does not revive them', async () => {
       const url = '/organization/users/' + users.new!.id + '/status';

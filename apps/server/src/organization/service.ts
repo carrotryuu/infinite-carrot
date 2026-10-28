@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { AuthService } from '../auth/http';
 import { IDENTITY_SCOPE } from '../auth/config';
 import { TeamScope, type ScopeContext } from '../gateway/team-scope';
+import { randomUUID } from 'node:crypto';
+import { COMPANY_TEAM_ID } from './constants';
 
 const assignmentSchema = z
   .object({
@@ -29,6 +31,46 @@ const assignmentSchema = z
 export type Principal = Awaited<ReturnType<OrganizationService['principal']>>;
 @Injectable()
 export class OrganizationService {
+  async createTeam(p: Principal, body: unknown) {
+    if (!p.organizationPermissions.includes(Permission.TeamCreate)) throw new ForbiddenException();
+    const parsed = z
+      .object({ name: z.string().trim().min(1).max(100) })
+      .strict()
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException('请填写 1～100 字的组名');
+    const db = this.admin(p);
+    return db.$transaction(async (tx) => {
+      await tx.role.updateMany({ where: { key: 'hrbp' }, data: { updatedAt: new Date() } });
+      const actor = await tx.user.findFirst({ where: { id: p.user.id, status: 'active' } });
+      const role = await tx.role.findFirst({ where: { key: 'hrbp' } });
+      if (
+        !actor ||
+        !role ||
+        !(await tx.membership.findFirst({
+          where: { userId: p.user.id, roleId: role.id, teamId: IDENTITY_SCOPE, projectId: null },
+        }))
+      )
+        throw new ForbiddenException();
+      if (await tx.team.findFirst({ where: { name: parsed.data.name } }))
+        throw new BadRequestException('组名已存在');
+      const id = randomUUID();
+      const team = await tx.team.create({
+        data: { id, teamId: id, tenantId: null, name: parsed.data.name },
+      });
+      await tx.auditLog.create({
+        data: {
+          teamId: IDENTITY_SCOPE,
+          tenantId: null,
+          actor: p.user.id,
+          action: 'team.created',
+          objectType: 'team',
+          objectId: id,
+          after: { name: team.name },
+        },
+      });
+      return { id: team.id, name: team.name };
+    });
+  }
   constructor(@Inject(AuthService) readonly auth: AuthService) {}
   get prisma() {
     return this.auth.runtime.prisma;
@@ -76,19 +118,94 @@ export class OrganizationService {
     const currentTeamId = teamIds.includes(storedTeam || '') ? storedTeam : (teamIds[0] ?? null);
     if (currentTeamId && storedTeam !== currentTeamId)
       await this.auth.runtime.selectTeam(token, currentTeamId);
+    const creationRole = (teamId: string) => {
+      const member =
+        memberships.find((m) => m.teamId === teamId && m.projectId === null) ??
+        (teamId === COMPANY_TEAM_ID
+          ? memberships.find(
+              (m) =>
+                m.teamId === teamId && roles.some((r) => r.id === m.roleId && r.key === 'producer'),
+            )
+          : undefined);
+      return roles.find((r) => r.id === member?.roleId);
+    };
     const points = (teamId: string, projectId?: string) => {
       const projectRole = projectId
         ? memberships.find((m) => m.teamId === teamId && m.projectId === projectId)
         : undefined;
       const membership =
-        projectRole ?? memberships.find((m) => m.teamId === teamId && m.projectId === null);
+        projectRole ??
+        (teamId === COMPANY_TEAM_ID && projectId
+          ? undefined
+          : memberships.find((m) => m.teamId === teamId && m.projectId === null));
+      if (teamId === COMPANY_TEAM_ID && !projectId)
+        return creationRole(teamId) && ['director', 'producer'].includes(creationRole(teamId)!.key)
+          ? [Permission.ProjectCreate]
+          : [];
       return membership
         ? rolePoints(membership.roleId).filter(
-            (p) => p !== Permission.AccountManage && p !== Permission.GlobalView,
+            (p) =>
+              p !== Permission.AccountManage &&
+              p !== Permission.GlobalView &&
+              p !== Permission.TeamCreate,
           )
         : [];
     };
-    return { user, memberships, organizationPermissions, teamIds, currentTeamId, points };
+    return {
+      user,
+      memberships,
+      organizationPermissions,
+      teamIds,
+      currentTeamId,
+      points,
+      creationRole,
+    };
+  }
+  async createProject(p: Principal, teamId: string, body: unknown) {
+    await this.assertTeam(p, teamId);
+    const role = p.creationRole(teamId);
+    if (
+      !role ||
+      !['director', 'producer'].includes(role.key) ||
+      !p.points(teamId).includes(Permission.ProjectCreate)
+    )
+      throw new ForbiddenException();
+    const parsed = z
+      .object({ name: z.string().trim().min(1).max(100) })
+      .strict()
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException('请填写 1～100 字的项目名');
+    const target = role.key === 'producer' ? COMPANY_TEAM_ID : teamId;
+    const db = this.team(target, p.user.id);
+    return db.$transaction(async (tx) => {
+      if (!(await tx.team.findFirst({ where: { id: target } })))
+        throw new BadRequestException('公司组尚未初始化');
+      const project = await tx.project.create({
+        data: { teamId: target, tenantId: null, name: parsed.data.name },
+      });
+      await tx.membership.create({
+        data: {
+          teamId: target,
+          tenantId: null,
+          userId: p.user.id,
+          roleId: role.id,
+          projectId: project.id,
+          scopeKey: project.id,
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          teamId: target,
+          tenantId: null,
+          actor: p.user.id,
+          action: 'project.created',
+          objectType: 'project',
+          objectId: project.id,
+          after: { name: project.name, teamId: target, creatorRole: role.key },
+        },
+      });
+      return { id: project.id, name: project.name, teamId: target };
+    });
   }
   async context(p: Principal): Promise<OrganizationContext> {
     const teams = (
@@ -154,7 +271,11 @@ export class OrganizationService {
     await this.assertTeam(p, teamId);
     if (projectId) await this.project(p, teamId, projectId);
     const memberships = await this.team(teamId, p.user.id).membership.findMany({
-      where: projectId ? { OR: [{ projectId }, { projectId: null }] } : {},
+      where: projectId
+        ? teamId === COMPANY_TEAM_ID
+          ? { projectId }
+          : { OR: [{ projectId }, { projectId: null }] }
+        : {},
     });
     const users = await this.identity(p.user.id).user.findMany({
       where: { id: { in: memberships.map((m) => m.userId) } },

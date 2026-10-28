@@ -1,5 +1,7 @@
 export enum Permission {
   AccountManage = 'account.manage',
+  TeamCreate = 'team.create',
+  ProjectCreate = 'project.create',
   CanvasView = 'canvas.view',
   CanvasUse = 'canvas.use',
   ReviewDecide = 'review.decide',
@@ -16,6 +18,7 @@ export const roleDefinitions = [
     key: 'director',
     name: '导演',
     permissions: [
+      Permission.ProjectCreate,
       Permission.CanvasView,
       Permission.CanvasUse,
       Permission.ReviewDecide,
@@ -36,6 +39,7 @@ export const roleDefinitions = [
     key: 'producer',
     name: '制片',
     permissions: [
+      Permission.ProjectCreate,
       Permission.CanvasView,
       Permission.CanvasUse,
       Permission.ReviewDecide,
@@ -51,6 +55,7 @@ export const roleDefinitions = [
     key: 'hrbp',
     name: 'HRBP',
     permissions: [
+      Permission.TeamCreate,
       Permission.CreditAllocate,
       Permission.MemberManage,
       Permission.AccountManage,

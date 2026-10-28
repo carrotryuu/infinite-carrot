@@ -67,6 +67,7 @@ function WorkspaceContent({
 }) {
   const canManage = usePermission(Permission.AccountManage);
   const canGlobal = usePermission(Permission.GlobalView);
+  const canCreateProject = usePermission(Permission.ProjectCreate);
   const [tab, setTab] = useState('projects');
   const [people, setPeople] = useState<Person[]>();
   const [error, setError] = useState('');
@@ -154,6 +155,21 @@ function WorkspaceContent({
           </button>
         )}
       </nav>
+      {tab === 'projects' && canCreateProject && context.currentTeamId && (
+        <CreationForm
+          label="新项目名称"
+          button="创建项目"
+          endpoint={'teams/' + context.currentTeamId + '/projects'}
+          hint="导演创建的项目归当前组；制片创建的项目归公司组，仅已分配成员可见。"
+          onCreated={async (result) => {
+            setContext(
+              await api<OrganizationContext>('organization/current-team', {
+                teamId: result.teamId,
+              }),
+            );
+          }}
+        />
+      )}
       {context.user.pendingAssignment && (
         <section className="workspace-panel">
           <h2>等待管理员分配</h2>
@@ -237,6 +253,7 @@ function ProjectCard({
   );
 }
 function AccountManagement({ actorId }: { actorId: string }) {
+  const canCreateTeam = usePermission(Permission.TeamCreate);
   const [data, setData] = useState<Administration>();
   const [selected, setSelected] = useState('');
   const [rows, setRows] = useState<Assignment[]>([]);
@@ -283,6 +300,17 @@ function AccountManagement({ actorId }: { actorId: string }) {
   return (
     <section className="workspace-panel">
       <h2>账号管理</h2>
+      {canCreateTeam && (
+        <CreationForm
+          label="新组名称"
+          button="创建组"
+          endpoint="organization/teams"
+          hint="创建组后，在下方为人员分配组和角色。"
+          onCreated={async () => {
+            await refresh();
+          }}
+        />
+      )}
       <p>
         按组分配默认角色，也可为单个项目设置覆盖角色。调组时移除原组配置并添加新组；保存会记录完整审计。
       </p>
@@ -446,5 +474,63 @@ function AccountManagement({ actorId }: { actorId: string }) {
       )}
       {notice && <p role="status">{notice}</p>}
     </section>
+  );
+}
+
+function CreationForm({
+  label,
+  button,
+  endpoint,
+  hint,
+  onCreated,
+}: {
+  label: string;
+  button: string;
+  endpoint: string;
+  hint: string;
+  onCreated: (result: { id: string; name: string; teamId?: string }) => Promise<void>;
+}) {
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  return (
+    <form
+      className="workspace-panel"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setBusy(true);
+        setError('');
+        setMessage('');
+        void api<{ id: string; name: string; teamId?: string }>(endpoint, { name })
+          .then(async (result) => {
+            await onCreated(result);
+            setName('');
+            setMessage('已创建：' + result.name);
+          })
+          .catch((err: Error) => setError(err.message))
+          .finally(() => setBusy(false));
+      }}
+    >
+      <p>{hint}</p>
+      <div className="workspace-actions">
+        <label>
+          {label}
+          <input
+            aria-label={label}
+            value={name}
+            required
+            maxLength={100}
+            disabled={busy}
+            onChange={(event) => setName(event.target.value)}
+          />
+        </label>
+        <button className="workspace-primary" disabled={busy || !name.trim()}>
+          {button}
+        </button>
+      </div>
+      {message && <p role="status">{message}</p>}
+      {error && <p role="alert">{error}</p>}
+    </form>
   );
 }

@@ -37,6 +37,30 @@ test('owner can read global people but has no account-management or project-memb
   await expect(page.getByRole('list')).toContainText('演示 HRBP');
   expect((await page.request.get('/api/organization/administration')).status()).toBe(403);
 });
+
+test('HRBP can create a group and producers create projects in the private company group', async ({
+  page,
+}) => {
+  await login(page, '演示 HRBP');
+  await page.getByRole('button', { name: '账号管理', exact: true }).click();
+  const group = '验收组-' + Date.now();
+  await page.getByLabel('新组名称').fill(group);
+  await page.getByRole('button', { name: '创建组', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText(group);
+  await page.getByRole('button', { name: '退出登录' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await login(page, '演示制片');
+  const project = '验收项目-' + Date.now();
+  await page.getByLabel('新项目名称').fill(project);
+  await page.getByRole('button', { name: '创建项目', exact: true }).click();
+  await expect(page.getByRole('article', { name: project })).toBeVisible();
+  await expect(page.getByLabel('当前组').locator('option:checked')).toHaveText('公司组');
+  await page.getByRole('button', { name: '退出登录' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await login(page, '演示老板');
+  await expect(page.getByRole('button', { name: '创建项目', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('article', { name: project })).toHaveCount(0);
+});
 test('HRBP transfers a user and disables their active session through the management page', async ({
   page,
   browser,

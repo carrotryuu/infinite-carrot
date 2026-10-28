@@ -42,6 +42,7 @@
   margin: 24px 0;
 }
 .workspace button,
+.workspace input,
 .workspace select {
   padding: 10px 14px;
   border: 1px solid #b8cbb5;

@@ -81,6 +81,11 @@ export class AccessGuard implements CanActivate {
 @Controller('organization')
 export class OrganizationController {
   constructor(@Inject(OrganizationService) readonly service: OrganizationService) {}
+  @Post('teams')
+  @RequirePermission(Permission.TeamCreate, 'organization')
+  createTeam(@Req() req: OrganizationRequest, @Body() body: unknown) {
+    return this.service.createTeam(req.principal, body);
+  }
   @Get('context')
   @Authenticated()
   context(@Req() req: OrganizationRequest) {
@@ -126,6 +131,15 @@ export class OrganizationController {
 @Controller('teams/:teamId')
 export class TeamController {
   constructor(@Inject(OrganizationService) readonly service: OrganizationService) {}
+  @Post('projects')
+  @RequirePermission(Permission.ProjectCreate)
+  createProject(
+    @Req() req: OrganizationRequest,
+    @Param('teamId') team: string,
+    @Body() body: unknown,
+  ) {
+    return this.service.createProject(req.principal, team, body);
+  }
   @Get('projects/:projectId')
   @RequirePermission(Permission.CanvasView, 'project')
   project(
